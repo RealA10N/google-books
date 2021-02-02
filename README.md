@@ -7,7 +7,7 @@
 The simplest way to install the _googlebooks_ module is by using `pip`. Just run the following command in your terminal:
 
 ```bash
-$ (sudo) pip install simplejsondb
+$ (sudo) pip install googlebooks
 ```
 
 You can also clone the [Github repo](https://github.com/RealA10N/googlebooks),
