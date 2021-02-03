@@ -1,3 +1,7 @@
+import typing
+from .utils.search import SearchFilters, SearchPrintType, SearchSorting
+
+
 class SearchQueryType:
     """ This object represents a single query type in the book search object.
     Using this object, the user can easily manage the search queries, and the
@@ -136,3 +140,137 @@ class SearchAdvancedQuery:
 
         queries = [self._main_query] + list(self._queries.values())
         return ''.join(str(value) for value in queries)
+
+
+class BooksSearch:
+
+    def __init__(self,
+                 query: typing.Union[SearchAdvancedQuery, str],
+                 lang: str = None,
+                 search_filter: str = None,
+                 print_type: str = None,
+                 order: str = None,
+                 downloadable_only: bool = False,
+                 ):
+
+        self.__params = self.__generate_params(
+            query=query, lang=lang, search_filter=search_filter,
+            print_type=print_type, order=order,
+            downloadable_only=downloadable_only
+        )
+
+    @classmethod
+    def __generate_params(cls,
+                          query: typing.Union[SearchAdvancedQuery, str],
+                          lang: str = None,
+                          search_filter: str = None,
+                          print_type: str = None,
+                          order: str = None,
+                          downloadable_only: bool = False,
+                          ) -> typing.Dict[str, str]:
+
+        # Handle the 'query' argument
+        query = cls.__generate_query_string(query)
+
+        # Handle the 'lang' argument
+        if lang is not None:
+            cls.__asserts_valid_language(lang)
+
+        # Handle the 'search_filter' argument
+        if search_filter is not None:
+            SearchFilters.assert_valid_option(search_filter)
+
+        # Handle the 'print_type' argument
+        if print_type is not None:
+            SearchPrintType.assert_valid_option(print_type)
+
+        # Handle the 'order' argument
+        if order is not None:
+            SearchSorting.assert_valid_option(order)
+
+        # Handle the 'downloadable_only' argument
+        downloadable_only = 'epub' if downloadable_only else None
+
+        # - - generate request params - - #
+
+        # Essential parameters only
+        params = {
+            'q': query,
+
+            # lets the Google Books API  know that we want to download
+            # all content of resulting books, and not just the most important
+            # data ('full' and not 'lite')
+            'projection': 'full',
+        }
+
+        # Extra params that the not required, but are optional
+        extra_params = {
+
+            key: value
+            for key, value in {
+                'langRestrict': lang,
+                'filter': search_filter,
+                'printType': print_type,
+                'orderBy': order,
+                'download': downloadable_only,
+            }.items()
+
+            # Removes params where the values are `None`
+            if value is not None
+        }
+
+        # Merges the two parameter dicts
+        params.update(extra_params)
+        return params
+
+    @staticmethod
+    def __asserts_valid_language(lang_iso: str) -> None:
+        """ Sets the book search langauge to the given language code.
+        We use the `ISO 639-1` code format. Find more about language codes
+        here:  https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes """
+
+        if not isinstance(lang_iso, str):
+            raise TypeError("Language code must be a 2 char string")
+
+        if len(lang_iso) != 2:
+            raise ValueError("Language code must be a 2 char string")
+
+    @staticmethod
+    def __generate_query_string(
+            query: typing.Union[SearchAdvancedQuery, str]) -> str:
+
+        # pylint: disable=invalid-name
+        REPLACE_CHARS = {
+            (
+                ('+', '-', ':'),
+                ' ',
+            ),
+            (
+                ('"', "'"),
+                '',
+            ),
+        }
+
+        if isinstance(query, str):
+            # If the given query is a simple query (string)
+
+            # Replace invalid strings in the query
+            for replace_from_tuple, replace_to in REPLACE_CHARS:
+                for replace_from in replace_from_tuple:
+                    query = query.replace(replace_from, replace_to)
+
+            # Return the 'fixed' string
+            return query
+
+        if isinstance(query, SearchAdvancedQuery):
+            # If the query is an advanced query:
+            # Generates the query string and returns it
+            return str(query)
+
+        # If the given query is not a string or an advanced query
+        # Raises an error!
+
+        #pylint: disable=line-too-long
+        raise TypeError(
+            f"Search query must be a string or an `SearchAdvancedQuery` instance (not {type(query)})"
+        )
