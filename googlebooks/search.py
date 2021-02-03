@@ -1,4 +1,4 @@
-class BookSearchQueryType:
+class SearchQueryType:
     """ This object represents a single query type in the book search object.
     Using this object, the user can easily manage the search queries, and the
     object automatically generates the find query string. """
@@ -64,8 +64,8 @@ class BookSearchQueryType:
         return include_string + exclude_string
 
 
-class BookSearchQueries:
-    """ A collection of `BookSearchQueryType` instances. Use the properties of
+class SearchAdvancedQuery:
+    """ A collection of `SearchQueryType` instances. Use the properties of
     this object to access different query types! """
 
     __AVALIABLE_QUERY_TYPES = {
@@ -74,9 +74,9 @@ class BookSearchQueries:
     }
 
     def __init__(self):
-        self._main_query = BookSearchQueryType()
+        self._main_query = SearchQueryType()
         self._queries = {
-            name: BookSearchQueryType(name)
+            name: SearchQueryType(name)
             for name in self.__AVALIABLE_QUERY_TYPES
         }
 
@@ -96,37 +96,37 @@ class BookSearchQueries:
         return self._main_query.exclude(query, exact)
 
     @property
-    def title(self,) -> BookSearchQueryType:
+    def title(self,) -> SearchQueryType:
         """ Search the queries in book titles only """
         return self._queries['intitle']
 
     @property
-    def author(self,) -> BookSearchQueryType:
+    def author(self,) -> SearchQueryType:
         """ Search the queries in book authors and editors only """
         return self._queries['inauthor']
 
     @property
-    def publisher(self,) -> BookSearchQueryType:
+    def publisher(self,) -> SearchQueryType:
         """ Search the queries in book publishers only """
         return self._queries['inpublisher']
 
     @property
-    def subject(self,) -> BookSearchQueryType:
+    def subject(self,) -> SearchQueryType:
         """ Search the queries in subject (categories) only """
         return self._queries['subject']
 
     @property
-    def isbn(self,) -> BookSearchQueryType:
+    def isbn(self,) -> SearchQueryType:
         """ Search the queries in book ISBN numbers only """
         return self._queries['isbn']
 
     @property
-    def lccn(self,) -> BookSearchQueryType:
+    def lccn(self,) -> SearchQueryType:
         """ Search the queries in book 'Library of Congress Control' numbers only """
         return self._queries['lccn']
 
     @property
-    def oclc(self,) -> BookSearchQueryType:
+    def oclc(self,) -> SearchQueryType:
         """ Search the queries in book 'Online Computer Library Center' number only """
         return self._queries['oclc']
 
