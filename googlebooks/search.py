@@ -190,6 +190,11 @@ class BooksSearch:
 
         return self.__results[index]
 
+    def __iter__(self,):
+        """ Iterate over the search results using the `IterBooksSearch`
+        object """
+        return IterBooksSearch(self)
+
     def __request_by_index(self, index: int) -> None:
         """ Makes a request to the Google Books API that returns the result
         in the given index, and results in the surrounding indecencies.
@@ -354,3 +359,28 @@ class BooksSearch:
         raise TypeError(
             f"Search query must be a string or an `SearchAdvancedQuery` instance (not {type(query)})"
         )
+
+
+class IterBooksSearch:
+
+    def __init__(self, parent: BooksSearch):
+        self.__parent = parent
+        self.__next_index = 0
+
+    def __iter__(self,):
+        return self
+
+    def __next__(self,):
+        """ Returns the next book result. """
+
+        try:
+            book = self.__parent[self.__next_index]
+
+        except KeyError as error:
+            # If index is out of range
+            # => there are no more results to show
+            # => stop the iteration using `StopIteration`!
+            raise StopIteration() from error
+
+        self.__next_index += 1
+        return book
