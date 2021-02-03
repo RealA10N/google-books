@@ -1,4 +1,8 @@
 import typing
+import urllib.parse
+
+import requests
+
 from .utils.search import SearchFilters, SearchPrintType, SearchSorting
 
 
@@ -144,6 +148,11 @@ class SearchAdvancedQuery:
 
 class BooksSearch:
 
+    SEARCH_API_URL = 'https://www.googleapis.com/books/v1/volumes'
+    BOOKS_PER_REQUEST = 10
+
+    # pylint: disable=too-many-arguments
+
     def __init__(self,
                  query: typing.Union[SearchAdvancedQuery, str],
                  lang: str = None,
@@ -153,11 +162,82 @@ class BooksSearch:
                  downloadable_only: bool = False,
                  ):
 
+        # Generates and saves the parameters that are used when
+        # requesting data from the Google Books API.
         self.__params = self.__generate_params(
             query=query, lang=lang, search_filter=search_filter,
             print_type=print_type, order=order,
             downloadable_only=downloadable_only
         )
+
+        # A dictionary that will contain all downloaded books.
+        # The keys in the dictionary are the indices of the results (index 0
+        # is the most relevant/new book).
+        self.__results: typing.Dict[int, typing.Any] = dict()
+
+    def __getitem__(self, index: int):
+        """ Returns the data that represents the result in the given index.
+        Throws a KeyError if the given result index is out of range. """
+
+        if not isinstance(index, int):
+            raise TypeError(
+                f'Book search results indices must be integers, not {type(index).__name__}')
+
+        # Checks if the result in the current index is already downloaded
+        if index not in self.__results:
+            # If it is not, downloads it!
+            self.__request_by_index(index)
+
+        return self.__results[index]
+
+    def __request_by_index(self, index: int) -> None:
+        """ Makes a request to the Google Books API that returns the result
+        in the given index, and results in the surrounding indecencies.
+        Those results are then saved in memory. """
+
+        # The minimum is to download one book per request
+        # and the maximum is to download 40 books per request (limited by
+        # the Google Books API).
+        per_request = sorted((1, self.BOOKS_PER_REQUEST, 40))[1]
+        start_index = (index // per_request) * per_request
+
+        # Request the actual data from the Google Books API
+        results = self.__request(
+            maxResults=per_request,
+            startIndex=start_index,
+        )
+
+        # For each new downloaded result, save the result in the
+        # memory (even if its not the exact requested index).
+        # This is kind of a cache!
+        for cur_index, result in enumerate(results, start=start_index):
+            self.__results[cur_index] = result
+
+    def __request(self,
+                  **additional_params
+                  ) -> typing.List[typing.Dict[str, str]]:
+        """ Makes a single request to the Google Books API, and returns a list
+        of dictionaries. Each dictionary contains data of a single book
+        volume! """
+
+        # Merge saved params and given additional params
+        params = self.__params.copy()
+        params.update(additional_params)
+
+        # request data from api
+        response = requests.get(
+            url=self.SEARCH_API_URL,
+            # params=params,
+            params=urllib.parse.urlencode(params, safe=':+-"')
+        )
+
+        print(response.url)
+
+        # Raise an error if an error has occurred
+        response.raise_for_status()
+
+        # Returns the list of the books data
+        return response.json()['items']
 
     @classmethod
     def __generate_params(cls,
