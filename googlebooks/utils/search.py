@@ -57,3 +57,24 @@ class SearchPrintType(OptionCollection):
     Magazines = 'magazines'
 
     AvaliableOptions = {All, Books, Magazines}
+
+
+class SearchSorting(OptionCollection):
+    """ By default, the Google Books API returns the search results ordered by
+    relevance (most relevent result first). Actually, the Google Books API
+    also supports sorting the results by release dates (newest result first).
+    The sorting options are:
+
+    - Relevance
+        Sort the results in order of the relevance of search terms (default)
+
+    - Newest
+        Sort the results in order of the most recently to least recently
+        published.
+
+    """
+
+    Relevance = 'relevance'
+    Newest = 'newest'
+
+    AvaliableOptions = {Relevance, Newest}
