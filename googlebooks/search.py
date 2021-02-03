@@ -146,7 +146,9 @@ class SearchAdvancedQuery:
         return ''.join(str(value) for value in queries)
 
 
-class BooksSearch:
+class BookSearch:
+    """ Search the world's most comprehensive index of full-test books - Google
+    Books. """
 
     SEARCH_API_URL = 'https://www.googleapis.com/books/v1/volumes'
     BOOKS_PER_REQUEST = 10
@@ -191,9 +193,9 @@ class BooksSearch:
         return self.__results[index]
 
     def __iter__(self,):
-        """ Iterate over the search results using the `IterBooksSearch`
+        """ Iterate over the search results using the `BookIterSearch`
         object """
-        return IterBooksSearch(self)
+        return BookIterSearch(self)
 
     def __request_by_index(self, index: int) -> None:
         """ Makes a request to the Google Books API that returns the result
@@ -236,8 +238,6 @@ class BooksSearch:
             params=urllib.parse.urlencode(params, safe=':+-"')
         )
 
-        print(response.url)
-
         # Raise an error if an error has occurred
         response.raise_for_status()
 
@@ -253,6 +253,10 @@ class BooksSearch:
                           order: str = None,
                           downloadable_only: bool = False,
                           ) -> typing.Dict[str, str]:
+        """ The search method can support a lot of arguments that configure
+        the search and lets the user find exactly the book he looks for.
+        This method recives all those parametes, and generates a dictionary
+        from them, that can be later used against the Google Books API. """
 
         # Handle the 'query' argument
         query = cls.__generate_query_string(query)
@@ -323,6 +327,13 @@ class BooksSearch:
     @staticmethod
     def __generate_query_string(
             query: typing.Union[SearchAdvancedQuery, str]) -> str:
+        """ We support two query types: the simple query, which is just a
+        regular string, or an advanced query, which is an instace of the
+        `SearchAdvancedQuery` object. The advanced query lets the user to
+        search books from a specific author, from different categories, etc.
+        However, both the simple and advanced queries need to be converted to
+        a proper query string before using it with the Google Books API, and
+        this is what this function does! """
 
         # pylint: disable=invalid-name
         REPLACE_CHARS = {
@@ -361,9 +372,11 @@ class BooksSearch:
         )
 
 
-class IterBooksSearch:
+class BookIterSearch:
+    """ A simple object that is used to iterate over the book search results.
+    This is the iteration of the `BookSearch` object. """
 
-    def __init__(self, parent: BooksSearch):
+    def __init__(self, parent: BookSearch):
         self.__parent = parent
         self.__next_index = 0
 
