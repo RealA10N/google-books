@@ -4,6 +4,7 @@ import urllib.parse
 import requests
 
 from .utils.search import SearchFilters, SearchPrintType, SearchSorting
+from .book import Book
 
 
 class SearchQueryType:
@@ -190,7 +191,8 @@ class BookSearch:
             # If it is not, downloads it!
             self.__request_by_index(index)
 
-        return self.__results[index]
+        data = self.__results[index]
+        return Book(data)
 
     def __iter__(self,):
         """ Iterate over the search results using the `BookIterSearch`
