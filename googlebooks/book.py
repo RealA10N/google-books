@@ -4,7 +4,7 @@ import string
 import requests
 
 
-class BookVolume:
+class Book:
 
     BOOK_ID_API_URL = 'https://www.googleapis.com/books/v1/volumes/{id}'
 
