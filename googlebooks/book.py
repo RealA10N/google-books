@@ -1,6 +1,7 @@
 import typing
 import string
 import datetime
+import warnings
 
 import dateparser
 import requests
@@ -16,18 +17,29 @@ class Book:
 
         cls.__assert_valid_id(book_id)
         url = cls.BOOK_ID_API_URL.replace('{id}', book_id)
-        response = requests.get(url=url)
 
-        # Raise an error if something went wrong
-        if response.status_code == 404:
-            # If the id doesn't match any book
-            raise ValueError("Book with the given id is not found")
+        try:
+            data = cls.__request(url)
 
-        # Check for other error that may have occurred
-        response.raise_for_status()
+        except requests.exceptions.HTTPError as error:
+            # If the response status code is not 200
+            raise ValueError(
+                f'Book with id {book_id} is unavailable.'
+            ) from error
 
         # Generates the instance and returns it
-        return cls(response.json())
+        return cls(data)
+
+    @staticmethod
+    def __request(url: str):
+        """ Makes a get request to the given url and returns the json data.
+        Raises an error if something goes wrong. """
+
+        response = requests.get(url=url)
+
+        # Check for other errors that may have occurred
+        response.raise_for_status()
+        return response.json()
 
     @staticmethod
     def __assert_valid_id(book_id: str):
@@ -100,6 +112,20 @@ class Book:
         except KeyError:
             # If the step is not valid, returns `None`
             return None
+
+    @property
+    def __self_link(self,) -> str:
+        """ The URL to this resource. Used to reload the resource, if needed. """
+        return self.__access('selfLink')
+
+    def reload(self,) -> None:
+        """ Reloads the resource. """
+
+        try:
+            self.__data = self.__request(self.__self_link)
+
+        except requests.exceptions.HTTPError as error:
+            warnings.warn(f'Reloading resource failed: {error}')
 
     @property
     def id(self,) -> str:  # pylint: disable=invalid-name
