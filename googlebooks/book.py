@@ -2,6 +2,7 @@ import typing
 import string
 import datetime
 
+from lxml import etree
 import dateparser
 import requests
 
@@ -124,3 +125,78 @@ class Book(BooksResource):
             self.published_str,
             settings={'RELATIVE_BASE': relative_to},
         )
+
+    @property
+    def description_xml(self,) -> str:
+        """ A synopsis of the book volume. Formatted in HTML and includes
+        simple formatting elements, such as b, i, and br tags. """
+
+        data = self._access('volumeInfo', 'description')
+
+        if data is not None:
+            return f'<p>{data}</p>'
+
+        return None
+
+    @property
+    def description_html(self,) -> str:
+        """ A synopsis of the book volume. Formatted in HTML and includes
+        simple formatting elements, such as b, i, and br tags. Same as the
+        `description_xml` property. """
+        return self.description_xml
+
+    @property
+    def description(self,) -> str:
+        """ A synopsis of the book volume. """
+
+        if self.description_xml is None:
+            return None
+
+        try:
+            # pylint: disable=c-extension-no-member
+            tree = etree.XML(self.description_xml)
+            return etree.tostring(tree, method='text', encoding='unicode')
+
+        except Exception:  # pylint: disable=broad-except
+            return None
+
+    def _identifier(self, identifier_name: str) -> str:
+        """ Industry standard identifiers for this book volume. This method
+        recives the name of the identifier, and returns its value. If the
+        identifier doesn't exist, returns None. """
+
+        identifiers = self._access('volumeInfo', 'industryIdentifiers')
+
+        try:
+            return next(
+                identifier['identifier']
+                for identifier in identifiers
+                if identifier['type'] == identifier_name
+            )
+
+        except StopIteration:
+            # If identifier is not in the list of identifiers
+            return None
+
+    @property
+    def isbn(self,) -> str:
+        """ The international standarad book number for this current volume. 
+        (13 characters). An alias of the `isbn_13` property. """
+        return self.isbn_13
+
+    @property
+    def isbn_13(self,) -> str:
+        """ The international standarad book number for this current volume
+        (13 characters). """
+        return self._identifier('ISBN_13')
+
+    @property
+    def isbn_10(self,) -> str:
+        """ The international standarad book number for this current volume
+        (10 characters). """
+        return self._identifier('ISBN_10')
+
+    @property
+    def pages(self,) -> int:
+        """ Total number of pages in this book volume. """
+        return self._access('volumeInfo', 'pageCount')
