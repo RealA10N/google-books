@@ -206,3 +206,46 @@ class Book(BooksResource):
     def pages(self,) -> int:
         """ Total number of pages in this book volume. """
         return self._access('volumeInfo', 'pageCount')
+
+    @staticmethod
+    def _dimension_str_to_float(dimension: str) -> typing.Optional[float]:
+        """ Recives a dimension string (for example '69.00 cm'), and returns
+        the dimension as a float. """
+
+        if dimension is None:
+            return None
+
+        valid_chars = string.digits + '.'
+        new_dimension = ''.join(
+            char for char in dimension if char in valid_chars)
+        return float(new_dimension)
+
+    @property
+    def height_str(self,) -> str:
+        """ Height or length of this book volume, as a readable string. """
+        return self._access('volumeInfo', 'dimensions', 'height')
+
+    @property
+    def height(self,) -> float:
+        """ Height or length of this book volume (in cm). """
+        return self._dimension_str_to_float(self.height_str)
+
+    @property
+    def width_str(self,) -> str:
+        """ Width of this book volume, as a readable string. """
+        return self._access('volumeInfo', 'dimensions', 'width')
+
+    @property
+    def width(self,) -> float:
+        """ Height or length of this book volume (in cm). """
+        return self._dimension_str_to_float(self.width_str)
+
+    @property
+    def thickness_str(self,) -> str:
+        """ Thickness of this book volume, as a readable string. """
+        return self._access('volumeInfo', 'dimensions', 'thickness')
+
+    @property
+    def thickness(self,) -> float:
+        """ Thickness of this book volume (in cm). """
+        return self._dimension_str_to_float(self.thickness_str)
