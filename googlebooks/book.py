@@ -249,3 +249,20 @@ class Book(BooksResource):
     def thickness(self,) -> float:
         """ Thickness of this book volume (in cm). """
         return self._dimension_str_to_float(self.thickness_str)
+
+    @property
+    def is_book(self,) -> bool:
+        """ `True` only if this book volume is a book (not a
+        magazine). """
+        return self._access('volumeInfo', 'printType') == 'BOOK'
+
+    @property
+    def is_magazine(self,) -> bool:
+        """ `True` only if this book volume is actually a magazine. """
+        return self._access('volumeInfo', 'printType') == 'MAGAZINE'
+
+    @property
+    def is_mature(self,) -> bool:
+        """ `True` only if the maturity rating for this book volume is
+        'mature'. """
+        return self._access('volumeInfo', 'maturityRating') == 'MATURE'
