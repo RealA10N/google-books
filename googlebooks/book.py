@@ -180,21 +180,27 @@ class Book(BooksResource):
 
     @property
     def isbn(self,) -> str:
-        """ The international standarad book number for this current volume. 
+        """ The 'International Standarad Book Number' for this current volume
         (13 characters). An alias of the `isbn_13` property. """
         return self.isbn_13
 
     @property
     def isbn_13(self,) -> str:
-        """ The international standarad book number for this current volume
+        """ The 'International Standarad Book Number' for this current volume
         (13 characters). """
         return self._identifier('ISBN_13')
 
     @property
     def isbn_10(self,) -> str:
-        """ The international standarad book number for this current volume
+        """ The 'International Standarad Book Number' for this current volume
         (10 characters). """
         return self._identifier('ISBN_10')
+
+    @property
+    def issn(self,) -> str:
+        """ The 'International Standard Serial Number' for this current book
+        volume. """
+        return self._identifier('ISSN')
 
     @property
     def pages(self,) -> int:
