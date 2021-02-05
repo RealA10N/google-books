@@ -338,3 +338,9 @@ class Book(BooksResource):
         except StopIteration:
             # If there is no avaliable image url
             return None
+
+    @property
+    def language(self,) -> str:
+        """ Best language for this book volume (based on content).
+        It is the two-letter ISO 639-1 code such as 'fr', 'en', etc. """
+        return self._access('volumeInfo', 'language')
