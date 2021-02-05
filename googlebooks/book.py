@@ -54,7 +54,7 @@ class Book(BooksResource):
         string seperated by commas and 'and'. """
 
         if len(strings) == 0:
-            return 'Unknown'
+            return ''
 
         main = list(strings[:-1])
         tail = strings[-1]
@@ -85,7 +85,7 @@ class Book(BooksResource):
         return self._access('volumeInfo', 'title')
 
     @property
-    def subtitle(self,) -> str:
+    def subtitle(self,) -> typing.Optional[str]:
         """ The subtitle of the book volume. """
         return self._access('volumeInfo', 'subtitle')
 
@@ -93,8 +93,7 @@ class Book(BooksResource):
     def authors(self,) -> typing.Tuple[str]:
         """ The names of the authors and/or editors of the book volume. """
         authors = self._access('volumeInfo', 'authors')
-        value = tuple(authors) if authors is not None else tuple()
-        return value
+        return tuple(authors) if authors is not None else tuple()
 
     @property
     def authors_str(self,) -> str:
@@ -103,17 +102,17 @@ class Book(BooksResource):
         return self.__combine_strings(self.authors)
 
     @property
-    def publisher(self,) -> str:
+    def publisher(self,) -> typing.Optional[str]:
         """ The publisher of the book volume. """
         return self._access('volumeInfo', 'publisher')
 
     @property
-    def published_str(self,) -> str:
+    def published_str(self,) -> typing.Optional[str]:
         """ The date of publication of the book volume. """
         return self._access('volumeInfo', 'publishedDate')
 
     @property
-    def published(self,) -> datetime.datetime:
+    def published(self,) -> typing.Optional[datetime.datetime]:
         """ The date of publication of the book volume. Returned as a datetime
         instance. """
 
@@ -127,7 +126,7 @@ class Book(BooksResource):
         )
 
     @property
-    def description_xml(self,) -> str:
+    def description_xml(self,) -> typing.Optional[str]:
         """ A synopsis of the book volume. Formatted in HTML and includes
         simple formatting elements, such as b, i, and br tags. """
 
@@ -139,14 +138,14 @@ class Book(BooksResource):
         return None
 
     @property
-    def description_html(self,) -> str:
+    def description_html(self,) -> typing.Optional[str]:
         """ A synopsis of the book volume. Formatted in HTML and includes
         simple formatting elements, such as b, i, and br tags. Same as the
         `description_xml` property. """
         return self.description_xml
 
     @property
-    def description(self,) -> str:
+    def description(self,) -> typing.Optional[str]:
         """ A synopsis of the book volume. """
 
         if self.description_xml is None:
@@ -160,7 +159,7 @@ class Book(BooksResource):
         except Exception:  # pylint: disable=broad-except
             return None
 
-    def _identifier(self, identifier_name: str) -> str:
+    def _identifier(self, identifier_name: str) -> typing.Optional[str]:
         """ Industry standard identifiers for this book volume. This method
         recives the name of the identifier, and returns its value. If the
         identifier doesn't exist, returns None. """
@@ -179,31 +178,31 @@ class Book(BooksResource):
             return None
 
     @property
-    def isbn(self,) -> str:
+    def isbn(self,) -> typing.Optional[str]:
         """ The 'International Standarad Book Number' for this current volume
         (13 characters). An alias of the `isbn_13` property. """
         return self.isbn_13
 
     @property
-    def isbn_13(self,) -> str:
+    def isbn_13(self,) -> typing.Optional[str]:
         """ The 'International Standarad Book Number' for this current volume
         (13 characters). """
         return self._identifier('ISBN_13')
 
     @property
-    def isbn_10(self,) -> str:
+    def isbn_10(self,) -> typing.Optional[str]:
         """ The 'International Standarad Book Number' for this current volume
         (10 characters). """
         return self._identifier('ISBN_10')
 
     @property
-    def issn(self,) -> str:
+    def issn(self,) -> typing.Optional[str]:
         """ The 'International Standard Serial Number' for this current book
         volume. """
         return self._identifier('ISSN')
 
     @property
-    def pages(self,) -> int:
+    def pages(self,) -> typing.Optional[int]:
         """ Total number of pages in this book volume. """
         return self._access('volumeInfo', 'pageCount')
 
@@ -221,32 +220,32 @@ class Book(BooksResource):
         return float(new_dimension)
 
     @property
-    def height_str(self,) -> str:
+    def height_str(self,) -> typing.Optional[str]:
         """ Height or length of this book volume, as a readable string. """
         return self._access('volumeInfo', 'dimensions', 'height')
 
     @property
-    def height(self,) -> float:
+    def height(self,) -> typing.Optional[float]:
         """ Height or length of this book volume (in cm). """
         return self._dimension_str_to_float(self.height_str)
 
     @property
-    def width_str(self,) -> str:
+    def width_str(self,) -> typing.Optional[str]:
         """ Width of this book volume, as a readable string. """
         return self._access('volumeInfo', 'dimensions', 'width')
 
     @property
-    def width(self,) -> float:
+    def width(self,) -> typing.Optional[float]:
         """ Height or length of this book volume (in cm). """
         return self._dimension_str_to_float(self.width_str)
 
     @property
-    def thickness_str(self,) -> str:
+    def thickness_str(self,) -> typing.Optional[str]:
         """ Thickness of this book volume, as a readable string. """
         return self._access('volumeInfo', 'dimensions', 'thickness')
 
     @property
-    def thickness(self,) -> float:
+    def thickness(self,) -> typing.Optional[float]:
         """ Thickness of this book volume (in cm). """
         return self._dimension_str_to_float(self.thickness_str)
 
