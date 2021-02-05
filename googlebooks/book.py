@@ -284,6 +284,12 @@ class Book(BooksResource):
         return self._access('volumeInfo', 'averageRating')
 
     @property
+    def content_version(self,) -> str:
+        """ An identifier for the version of the volume content (text &
+        images). """
+        return self._access('volumeInfo', 'contentVersion')
+
+    @property
     def image_url_small_thumbnail(self,) -> typing.Optional[str]:
         """	Image link for small thumbnail size (width of ~80 pixels). """
         return self._access('volumeInfo', 'imageLinks', 'thumbnail')
