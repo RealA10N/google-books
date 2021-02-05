@@ -266,3 +266,19 @@ class Book(BooksResource):
         """ `True` only if the maturity rating for this book volume is
         'mature'. """
         return self._access('volumeInfo', 'maturityRating') == 'MATURE'
+
+    @property
+    def ratings_count(self,) -> int:
+        """ The number of review ratings for this book volume. """
+
+        count = self._access('volumeInfo', 'ratingsCount')
+        if count is None:
+            return 0
+
+        return count
+
+    @property
+    def rating(self,) -> typing.Optional[float]:
+        """ The mean review rating for this bok volume (min = 1.0,
+        max = 5.0). `None` if there are no rating. """
+        return self._access('volumeInfo', 'averageRating')
