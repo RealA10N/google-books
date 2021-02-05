@@ -282,3 +282,54 @@ class Book(BooksResource):
         """ The mean review rating for this bok volume (min = 1.0,
         max = 5.0). `None` if there are no rating. """
         return self._access('volumeInfo', 'averageRating')
+
+    @property
+    def image_url_small_thumbnail(self,) -> typing.Optional[str]:
+        """	Image link for small thumbnail size (width of ~80 pixels). """
+        return self._access('volumeInfo', 'imageLinks', 'thumbnail')
+
+    @property
+    def image_url_thumbnail(self,) -> typing.Optional[str]:
+        """	Image link for thumbnail size (width of ~128 pixels). """
+        return self._access('volumeInfo', 'imageLinks', 'thumbnail')
+
+    @property
+    def image_url_small(self,) -> typing.Optional[str]:
+        """ Image link for small size (width of ~300 pixels). """
+        return self._access('volumeInfo', 'imageLinks', 'small')
+
+    @property
+    def image_url_medium(self,) -> typing.Optional[str]:
+        """ Image link for medium size (width of ~575 pixels). """
+        return self._access('volumeInfo', 'imageLinks', 'medium')
+
+    @property
+    def image_url_large(self,) -> typing.Optional[str]:
+        """ Image link for large size (width of ~800 pixels). """
+        return self._access('volumeInfo', 'imageLinks', 'large')
+
+    @property
+    def image_url_extra_large(self,) -> typing.Optional[str]:
+        """ Image link for extra large size (width of ~1280 pixels). """
+        return self._access('volumeInfo', 'imageLinks', 'extraLarge')
+
+    @property
+    def image_url(self,) -> typing.Optional[str]:
+        """ Image link for the largest image avaliable. """
+
+        try:
+            return next(
+                link for link in (
+                    self.image_url_extra_large,
+                    self.image_url_large,
+                    self.image_url_medium,
+                    self.image_url_small,
+                    self.image_url_thumbnail,
+                    self.image_url_small_thumbnail,
+                )
+                if link is not None
+            )
+
+        except StopIteration:
+            # If there is no avaliable image url
+            return None
